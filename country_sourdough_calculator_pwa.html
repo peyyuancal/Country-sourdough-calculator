@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Country Sourdough Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- PWA meta -->
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Country Sourdough">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f5f5f5;
+    }
+    .app {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 16px 18px 24px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin: 0 0 8px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 1rem;
+      margin: 16px 0 6px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 3px;
+    }
+    .section {
+      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+    .field-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .field {
+      flex: 1;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: #777;
+      margin-top: 2px;
+    }
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      margin-top: 8px;
+      cursor: pointer;
+      background: #1976d2;
+      color: #fff;
+    }
+    button:active {
+      opacity: 0.85;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    th, td {
+      padding: 4px 5px;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+    }
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+    .summary-line {
+      font-size: 0.8rem;
+      color: #444;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #e3f2fd;
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
+    .results-block {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #f7f9ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Country Sourdough</h1>
+
+    <!-- INPUTS -->
+    <div class="section">
+      <h2>Basic settings</h2>
+      <div class="field-row">
+        <div class="field">
+          <label for="doughWeight">Total dough weight</label>
+          <input type="number" id="doughWeight" value="800" step="1" />
+          <div class="hint">grams total dough</div>
+        </div>
+        <div class="field">
+          <label for="levainPct">Levain % of flour</label>
+          <input type="number" id="levainPct" value="20" step="0.1" />
+          <div class="hint">percent, e.g. 20 for 20%</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="scale">Levain scale</label>
+          <input type="number" id="scale" value="1" step="0.1" />
+          <div class="hint">flour : water : starter = scale : scale : 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Flours & baker’s %</h2>
+      <div class="field-row">
+        <div class="field">
+          <label for="wholewheatPct">Wholewheat</label>
+          <input type="number" id="wholewheatPct" value="10" step="0.1" />
+          <div class="hint">percent of total flour</div>
+        </div>
+        <div class="field">
+          <label for="flour3Pct">Flour 3</label>
+          <input type="number" id="flour3Pct" value="0" step="0.1" />
+          <div class="hint">percent of total flour</div>
+        </div>
+      </div>
+
+      <div class="summary-line">
+        Strong white flour (calculated): <span id="strongWhiteDisplay"></span>
+      </div>
+
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field">
+          <label for="waterPct">Water</label>
+          <input type="number" id="waterPct" value="80" step="0.1" />
+          <div class="hint">baker’s %, e.g. 80 for 80%</div>
+        </div>
+        <div class="field">
+          <label for="saltPct">Salt</label>
+          <input type="number" id="saltPct" value="2" step="0.1" />
+          <div class="hint">baker’s %, e.g. 2 for 2%</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="inc1Pct">Inclusion 1</label>
+          <input type="number" id="inc1Pct" value="0" step="0.1" />
+          <div class="hint">baker’s %, optional</div>
+        </div>
+        <div class="field">
+          <label for="inc2Pct">Inclusion 2</label>
+          <input type="number" id="inc2Pct" value="0" step="0.1" />
+          <div class="hint">baker’s %, optional</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="inc3Pct">Inclusion 3</label>
+          <input type="number" id="inc3Pct" value="0" step="0.1" />
+          <div class="hint">baker’s %, optional</div>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <!-- OUTPUTS -->
+    <div id="results" style="display:none;">
+      <div class="results-block">
+        <div class="summary-line">
+          Total flour: <span id="totalFlour"></span>,
+          Pre-fermented flour: <span id="prefFlour"></span>
+          <span class="badge" id="pffBadge"></span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Total ingredients</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Ingredient</th>
+              <th>Baker’s %</th>
+              <th>Weight (g)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Strong white flour</td><td id="bStrWhite"></td><td id="gStrWhite"></td></tr>
+            <tr><td>Wholewheat</td><td id="bWholewheat"></td><td id="gWholewheat"></td></tr>
+            <tr><td>Flour 3</td><td id="bFlour3"></td><td id="gFlour3"></td></tr>
+            <tr><td>Water</td><td id="bWater"></td><td id="gWater"></td></tr>
+            <tr><td>Salt</td><td id="bSalt"></td><td id="gSalt"></td></tr>
+            <tr><td>Inclusion 1</td><td id="bInc1"></td><td id="gInc1"></td></tr>
+            <tr><td>Inclusion 2</td><td id="bInc2"></td><td id="gInc2"></td></tr>
+            <tr><td>Inclusion 3</td><td id="bInc3"></td><td id="gInc3"></td></tr>
+          </tbody>
+        </table>
+        <div class="summary-line">
+          Total weight ≈ <span id="totalIngredients"></span> (should match dough weight)
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Ferments</h2>
+        <table>
+          <thead>
+            <tr><th>Ripe starter</th><th>Baker’s %</th><th>Weight (g)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Flour</td><td>100 %</td><td id="o15"></td></tr>
+            <tr><td>Water</td><td>100 %</td><td id="o16"></td></tr>
+            <tr><td><strong>Total ripe starter</strong></td><td></td><td id="o17"></td></tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <tr><th>Levain build</th><th>Baker’s %</th><th>Weight (g)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Strong white flour</td><td id="m20"></td><td id="o20"></td></tr>
+            <tr><td>Water</td><td id="m21"></td><td id="o21"></td></tr>
+            <tr><td>Ripe starter</td><td>100 %</td><td id="o22"></td></tr>
+            <tr><td><strong>Total levain</strong></td><td></td><td id="o23"></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>Main dough</h2>
+        <table>
+          <thead>
+            <tr><th>Ingredient</th><th>Weight (g)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Strong white flour</td><td id="u14"></td></tr>
+            <tr><td>Wholewheat (Flour 2)</td><td id="u15"></td></tr>
+            <tr><td>Flour 3</td><td id="u16"></td></tr>
+            <tr><td>Water</td><td id="u17"></td></tr>
+            <tr><td>Salt</td><td id="u18"></td></tr>
+            <tr><td>Levain</td><td id="u19"></td></tr>
+            <tr><td>Inclusion 1</td><td id="u20"></td></tr>
+            <tr><td>Inclusion 2</td><td id="u21"></td></tr>
+            <tr><td>Inclusion 3</td><td id="u22"></td></tr>
+            <tr><th>Total dough</th><th id="u23"></th></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function parsePct(raw, defaultVal) {
+      let v = parseFloat(raw);
+      if (isNaN(v)) return defaultVal;
+      if (v > 1.5) v = v / 100.0;
+      return v;
+    }
+
+    function fmtGrams(x) {
+      if (!isFinite(x)) return "-";
+      const v = Math.round(x);
+      return v + " g";
+    }
+
+    function fmtPctFromFrac(f) {
+      if (!isFinite(f)) return "-";
+      return (Math.round(f * 1000) / 10).toFixed(1) + " %";
+    }
+
+    function calculate() {
+      const dough = parseFloat(document.getElementById("doughWeight").value);
+      if (!dough || dough <= 0) {
+        alert("Please enter a valid dough weight.");
+        return;
+      }
+
+      const levainFrac = parsePct(document.getElementById("levainPct").value, 0.2);
+      const scale = parseFloat(document.getElementById("scale").value) || 1;
+
+      const wholewheat = parsePct(document.getElementById("wholewheatPct").value, 0.1);
+      const flour3    = parsePct(document.getElementById("flour3Pct").value, 0.0);
+      const waterPct  = parsePct(document.getElementById("waterPct").value, 0.8);
+      const saltPct   = parsePct(document.getElementById("saltPct").value, 0.02);
+      const inc1      = parsePct(document.getElementById("inc1Pct").value, 0.0);
+      const inc2      = parsePct(document.getElementById("inc2Pct").value, 0.0);
+      const inc3      = parsePct(document.getElementById("inc3Pct").value, 0.0);
+
+      const strongWhite = 1 - wholewheat - flour3;
+      if (strongWhite < 0) {
+        alert("Flour fractions (wholewheat + flour 3) exceed 100% of flour.");
+        return;
+      }
+
+      document.getElementById("strongWhiteDisplay").textContent = fmtPctFromFrac(strongWhite);
+
+      const denomAll  = strongWhite + wholewheat + flour3 + waterPct + saltPct + inc1 + inc2 + inc3;
+      const denomSalt = strongWhite + wholewheat + flour3 + waterPct + saltPct;
+
+      if (denomAll <= 0 || denomSalt <= 0) {
+        alert("Please check your baker’s percentages – something is off.");
+        return;
+      }
+
+      const G14 = dough / denomAll * strongWhite;
+      const G15 = dough / denomAll * wholewheat;
+      const G16 = dough / denomAll * flour3;
+      const G17 = dough / denomAll * waterPct;
+      const G18 = dough / denomSalt * saltPct;
+      const G19 = dough / denomAll * inc1;
+      const G20 = dough / denomAll * inc2;
+      const G21 = dough / denomAll * inc3;
+
+      const totalIngredients = G14+G15+G16+G17+G18+G19+G20+G21;
+      const totalFlour = G14 + G15 + G16;
+
+      const levainWeight = totalFlour * levainFrac;
+
+      const M20 = scale;
+      const M21 = scale;
+      const M22 = 1;
+      const sumLevainParts = M20 + M21 + M22;
+
+      const O20 = levainWeight / sumLevainParts * M20;
+      const O21 = levainWeight / sumLevainParts * M21;
+      const O22 = levainWeight / sumLevainParts * M22;
+      const O23 = levainWeight;
+
+      const M15 = 1;
+      const M16 = 1;
+      const sumStarterParts = M15 + M16;
+      const O17 = O22;
+      const O15 = O17 / sumStarterParts * M15;
+      const O16 = O17 / sumStarterParts * M16;
+
+      const preFermentedFlour = O15 + O20;
+      const pff = totalFlour > 0 ? (preFermentedFlour / totalFlour * 100) : 0;
+
+      const U14 = G14 - preFermentedFlour;
+      const U15 = G15;
+      const U16 = G16;
+      const U17 = G17 - O16 - O21;
+      const U18 = G18;
+      const U19 = levainWeight;
+      const U20 = G19;
+      const U21 = G20;
+      const U22 = G21;
+      const U23 = U14+U15+U16+U17+U18+U19+U20+U21+U22;
+
+      document.getElementById("bStrWhite").textContent = fmtPctFromFrac(strongWhite);
+      document.getElementById("bWholewheat").textContent = fmtPctFromFrac(wholewheat);
+      document.getElementById("bFlour3").textContent = fmtPctFromFrac(flour3);
+      document.getElementById("bWater").textContent = fmtPctFromFrac(waterPct);
+      document.getElementById("bSalt").textContent = fmtPctFromFrac(saltPct);
+      document.getElementById("bInc1").textContent = fmtPctFromFrac(inc1);
+      document.getElementById("bInc2").textContent = fmtPctFromFrac(inc2);
+      document.getElementById("bInc3").textContent = fmtPctFromFrac(inc3);
+
+      document.getElementById("gStrWhite").textContent = fmtGrams(G14);
+      document.getElementById("gWholewheat").textContent = fmtGrams(G15);
+      document.getElementById("gFlour3").textContent = fmtGrams(G16);
+      document.getElementById("gWater").textContent   = fmtGrams(G17);
+      document.getElementById("gSalt").textContent    = fmtGrams(G18);
+      document.getElementById("gInc1").textContent    = fmtGrams(G19);
+      document.getElementById("gInc2").textContent    = fmtGrams(G20);
+      document.getElementById("gInc3").textContent    = fmtGrams(G21);
+      document.getElementById("totalIngredients").textContent = fmtGrams(totalIngredients);
+
+      document.getElementById("totalFlour").textContent = fmtGrams(totalFlour);
+      document.getElementById("prefFlour").textContent  = fmtGrams(preFermentedFlour);
+      document.getElementById("pffBadge").textContent   = pff.toFixed(1) + "% PFF";
+
+      document.getElementById("m20").textContent = fmtPctFromFrac(M20);
+      document.getElementById("m21").textContent = fmtPctFromFrac(M21);
+      document.getElementById("o15").textContent = fmtGrams(O15);
+      document.getElementById("o16").textContent = fmtGrams(O16);
+      document.getElementById("o17").textContent = fmtGrams(O17);
+      document.getElementById("o20").textContent = fmtGrams(O20);
+      document.getElementById("o21").textContent = fmtGrams(O21);
+      document.getElementById("o22").textContent = fmtGrams(O22);
+      document.getElementById("o23").textContent = fmtGrams(O23);
+
+      document.getElementById("u14").textContent = fmtGrams(U14);
+      document.getElementById("u15").textContent = fmtGrams(U15);
+      document.getElementById("u16").textContent = fmtGrams(U16);
+      document.getElementById("u17").textContent = fmtGrams(U17);
+      document.getElementById("u18").textContent = fmtGrams(U18);
+      document.getElementById("u19").textContent = fmtGrams(U19);
+      document.getElementById("u20").textContent = fmtGrams(U20);
+      document.getElementById("u21").textContent = fmtGrams(U21);
+      document.getElementById("u22").textContent = fmtGrams(U22);
+      document.getElementById("u23").textContent = fmtGrams(U23);
+
+      document.getElementById("results").style.display = "block";
+    }
+
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').catch(function(err) {
+          console.log('Service worker registration failed:', err);
+        });
+      });
+    }
+
+    // auto-run once with defaults
+    calculate();
+  </script>
+</body>
+</html>
